@@ -238,7 +238,8 @@ struct  _ArvViewer {
 	guint frame_retention;
 	ArvRegisterCachePolicy register_cache_policy;
 	ArvRangeCheckPolicy range_check_policy;
-        ArvUvUsbMode usb_mode;
+		ArvUvUsbMode usb_mode;
+		char *open_device_on_start;
 
 	gulong video_window_xid;
 };
@@ -263,7 +264,8 @@ arv_viewer_set_options (ArvViewer *viewer,
 			guint frame_retention,
 			ArvRegisterCachePolicy register_cache_policy,
 			ArvRangeCheckPolicy range_check_policy,
-                        ArvUvUsbMode usb_mode)
+                        ArvUvUsbMode usb_mode,
+						char *open_device_on_start)
 {
 	g_return_if_fail (viewer != NULL);
 
@@ -275,6 +277,7 @@ arv_viewer_set_options (ArvViewer *viewer,
 	viewer->register_cache_policy = register_cache_policy;
 	viewer->range_check_policy = range_check_policy;
         viewer->usb_mode = usb_mode;
+		viewer->open_device_on_start = open_device_on_start;
 }
 
 static double
@@ -1965,6 +1968,34 @@ activate (GApplication *application)
 
 	select_mode (viewer, ARV_VIEWER_MODE_CAMERA_LIST);
 	update_device_list_cb (GTK_TOOL_BUTTON (viewer->refresh_button), viewer);
+	
+		
+	if (viewer->open_device_on_start != NULL) {
+		GtkTreeIter iter;
+		gboolean valid;
+		GtkTreeModel *tree_model;
+		char *camera_id = NULL;
+		
+		tree_model = gtk_tree_view_get_model (GTK_TREE_VIEW (viewer->camera_tree));
+		
+		g_print("Trying to start playback from device %s\n", viewer->open_device_on_start);
+		
+		valid = gtk_tree_model_get_iter_first (tree_model, &iter);
+		while (valid) {
+			gtk_tree_model_get (tree_model, &iter, 4, &camera_id, -1);
+			if (g_strcmp0(camera_id, viewer->open_device_on_start) == 0) {
+				g_print("Found Camera with serial %s\n", camera_id);
+				gtk_tree_model_get (tree_model, &iter, 0, &camera_id, -1);
+				g_print("Starting playback from camera %s\n", camera_id);
+				start_camera(viewer, camera_id);
+				select_mode (viewer, ARV_VIEWER_MODE_VIDEO);
+				g_free (camera_id);
+				gtk_window_fullscreen(GTK_WINDOW(viewer->main_window));
+				break;
+			}
+			valid = gtk_tree_model_iter_next (tree_model, &iter);
+		}
+	}
 }
 
 static void

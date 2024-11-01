@@ -39,6 +39,7 @@ void			arv_viewer_set_options		(ArvViewer *viewer,
 							 guint frame_retention,
 							 ArvRegisterCachePolicy register_cache_policy,
 							 ArvRangeCheckPolicy range_check_policy,
-                                                         ArvUvUsbMode usb_mode);
+                             ArvUvUsbMode usb_mode,
+							 char *open_device_on_start);
 
 G_END_DECLS
