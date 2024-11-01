@@ -35,6 +35,7 @@
 
 static char *arv_viewer_option_debug_domains = NULL;
 static char *arv_option_register_cache = NULL;
+static char *arv_option_open_device = NULL;
 static char *arv_option_range_check = NULL;
 static gboolean arv_viewer_option_auto_socket_buffer = FALSE;
 static gboolean arv_viewer_option_no_packet_resend = FALSE;
@@ -73,6 +74,10 @@ static const GOptionEntry arv_viewer_option_entries[] =
 		"debug", 				'd', 0, G_OPTION_ARG_STRING,
 		&arv_viewer_option_debug_domains, 	NULL,
 		"{<category>[:<level>][,...]|help}"
+	},
+	{
+		"open-device",			'o', 0, G_OPTION_ARG_STRING,
+		&arv_option_open_device,	"Open device on startup", NULL
 	},
 	{ NULL }
 };
@@ -159,7 +164,8 @@ main (int argc, char **argv)
 				arv_viewer_option_packet_timeout,
 				arv_viewer_option_frame_retention,
 				register_cache_policy,
-				range_check_policy);
+				range_check_policy,
+				arv_option_open_device);
 
 	notify_init ("Aravis Viewer");
 
